@@ -2,6 +2,7 @@ const logger = require('./connectors/logger');
 const { NumericDate } = require('./helpers');
 const crypto = require('./crypto');
 const github = require('./github');
+const { GITHUB_SCOPES } = require('./config');
 
 const getJwks = () => ({ keys: [crypto.getPublicKey()] });
 
@@ -53,6 +54,26 @@ const getUserInfo = (accessToken) =>
     logger.debug('Resolved combined claims: %j', mergedClaims, {});
     return mergedClaims;
   });
+
+const verifyOrgMembership = (accessToken, org, user) =>
+  github()
+    .getOrgMembership(accessToken, org, user)
+    .then((response) => {
+      if (response.status === 204 || response.status === 200) {
+        return true;
+      }
+      throw new Error(`Could not verify ${user} membership in ${org}`, response);
+    })
+
+const verifyTeamMembership = (accessToken, org, team, user) =>
+  github()
+    .getTeamMembership(accessToken, org, team, user)
+    .then((response) => {
+      if (response.status === 204 || response.status === 200) {
+        return true;
+      }
+      throw new Error(`Could not verify ${user} membership in team ${team} (${org})`, response);
+    })
 
 const getAuthorizeUrl = (client_id, scope, state, response_type) =>
   github().getAuthorizeUrl(client_id, scope, state, response_type);
@@ -112,7 +133,7 @@ const getConfigFor = (host) => ({
   // end_session_endpoint: 'https://server.example.com/connect/end_session',
   jwks_uri: `https://${host}/.well-known/jwks.json`,
   // registration_endpoint: 'https://server.example.com/connect/register',
-  scopes_supported: ['openid', 'read:user', 'user:email'],
+  scopes_supported: GITHUB_SCOPES.split(' '),
   response_types_supported: [
     'code',
     'code id_token',
@@ -146,4 +167,6 @@ module.exports = {
   getJwks,
   getConfigFor,
   getAuthorizeUrl,
+  verifyOrgMembership,
+  verifyTeamMembership
 };

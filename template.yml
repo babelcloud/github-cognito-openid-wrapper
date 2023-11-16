@@ -20,6 +20,12 @@ Globals:
           Ref: GitHubUrlParameter
         GITHUB_LOGIN_URL:
           Ref: GitHubLoginUrlParameter
+        GITHUB_ORGS:
+          Ref: GithubOrgsParameter
+        GITHUB_TEAMS:
+          Ref: GithubTeamsParameter
+        GITHUB_SCOPES:
+          Ref: GithubScopesParameter
 
 Parameters:
   GitHubClientIdParameter:
@@ -36,6 +42,15 @@ Parameters:
     Type: String
     Default: "https://github.com"
     MinLength: 1
+  GithubOrgsParameter:
+    Type: String
+    Default: ""
+  GithubTeamsParameter:
+    Type: String
+    Default: ""
+  GithubScopesParameter:
+    Type: String
+    Default: ""
   StageNameParameter:
     Type: String
 
